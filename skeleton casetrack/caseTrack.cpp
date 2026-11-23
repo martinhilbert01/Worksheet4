@@ -210,6 +210,19 @@ std::map<std::string, std::vector<double>> normalize_per_capita(std::unique_ptr<
 
   // TODO: YOUR SOLUTION HERE
 
+
+
+  std::map<std::string, std::vector<double>> cases_normalized;
+
+  for (int i = 0; i < data_frame->regions.size(); ++i) {
+    std::vector<double> normalized;
+
+    for (int j = 0; j < data_frame->cases[i].size(); ++j) {
+      normalized.push_back(static_cast<double>(data_frame->cases[i][j]) / data_frame->population[i] * 100000.0);
+    }   
+    cases_normalized[data_frame->regions[i]] = std::move(normalized);
+  }
+
   /*
   ** 1. Extract references to regions, cases, and population
   **    from data_frame.
@@ -225,7 +238,7 @@ std::map<std::string, std::vector<double>> normalize_per_capita(std::unique_ptr<
   ** 4. Change the returned object to cases_normalized i.e.
   **    the map you just populated.
   */
-  return std::map<std::string, std::vector<double>>{};
+  return cases_normalized;
 }
 
 int main() {
@@ -259,17 +272,24 @@ int main() {
     // and regions = countries.
     // Hint: You need to dereference the pointer first.
 
+    data_frame = std::make_unique<DataFrame>();
+
+    data_frame->cases = dummy_cases;
+    data_frame->population = dummy_population;
+    data_frame->regions = countries;
     // Since this is not yet implemented, throw an exception.
     // This would make more sense in another function, which we
     // could then wrap in a try{}catch(){} block.
-    throw std::runtime_error("Tracking is not yet implemented for dummy data.\n");
+    // throw std::runtime_error("Tracking is not yet implemented for dummy data.\n");
     // TODO: Remove the above exception, once implemented.
   } else if (choice == 'r') {
     // TODO: get a unique_ptr from read_from_csv()
     // and assign it to the data_frame variable.
     // This unique pointer provides you real data.
 
-    throw std::runtime_error("Tracking is not yet implemented for real data.\n");
+    data_frame = read_from_csv();
+
+    // throw std::runtime_error("Tracking is not yet implemented for real data.\n");
     // TODO: Remove the above exception, once implemented.
   } else {
     std::cout << "It's fine if you cannot make up your mind. Maybe another time then...\n";
@@ -280,9 +300,18 @@ int main() {
   // data_frame pointer you just initialized. Hint: You can use the existing
   // operator<< overload (implemented above) for printing vectors.
 
+  for (int i = 0; i < (*data_frame).regions.size(); ++i) {
+    std::cout << data_frame->regions[i] << ": " << (*data_frame).cases[i] << std::endl;
+  }
+
   // TODO: After implementing normalize_per_capita()
   // 1. Call normalize_per_capita
   // 2. Print out the new normalized case numbers.
   // Hint: You can use the example in the worksheet to
   // iterate over the map.
+
+  std::map<std::string, std::vector<double>> cases_normalized = normalize_per_capita(data_frame);
+  for (const auto& [region, cases] : cases_normalized) {
+    std::cout << "Country: " << region << " Cases: " << cases << std::endl;
+  }
 }
